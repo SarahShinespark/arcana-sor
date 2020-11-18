@@ -5,7 +5,7 @@ Project page for Arcana - Seal of Rimsala, a Super Nintendo game mod.
 - Contains extract-and-display tools to read specific data from the game ROM.
 
 ### Arcana SOR v2.1a12
-- Contains the patch file and game readme bundled with the current release on [RHDN](www.romhacking.net).
+- Contains the patch file and game readme bundled with the current release on [RHDN](http://www.romhacking.net).
 - Transcription excerpt follows.
 
 
