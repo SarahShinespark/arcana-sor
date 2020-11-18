@@ -1,0 +1,436 @@
+Formations work in the following order:
+-Obtain map tile and chapter
+-Find formation based on tile's low digit and chapter
+-Find H2 (position) table based on formation's H2 value (2nd header byte)
+-Randomly select an entry in H2 table
+-H2 directs where enemies are positioned and which IDs are reused
+
+Obtaining map tile
+------------------
+Formation use map tile values 10-1F or 20-2F
+ (2 just indicates increased encounter rate)
+The one's digit "Y" is the formation #.
+
+For example, in Ch1 standing on map tile 10,
+Formation # is "0". (one's digit of 10)
+Ch1 Formation 0, as the table says,
+is "050A 00 03 05 07 09".
+
+Header is 2 bytes. In this example:
+H1 (1st header byte) "05":
+ 5 is the # of enemy IDs,
+ 0 is the battle music (standard). "15" would use boss music.
+H2 (2nd header byte) "0A" is the H2 table ID.
+ After the header are the monster IDs.
+ In this case the data after 05 0A is
+(00 03 05 07 09) -> Slime, Goblin, Hound, Saurian, Chimera
+
+
+H2 value determines which Battle List to use
+*Pointer values loaded at $98/809A LDA [$1C]
+*Loops are at $98/80A5-80B1
+Table locations:
+00: 9288
+01: 9305
+02: 9309
+03: 937C
+04: 93FF
+05: 9403
+06: 9407
+07: 946E
+08: 9472
+09: 9478
+0A: 947C
+0B: 94D9
+
+
+*Ch1 Enemy List
+(18/9147 = C1147 PC address)
+ (1F)
+*If Y=0, $18 stays       at 9147 (050A 00 03 05 07 09) Slime, Goblin, Dog, Saurian, Chimera
+*If Y=1, $18 moves (5+2) to 914E (050A 00 01 06 07 09) Slime, Pickpocket, Wolf, Saurian, Chimera
+*If Y=2, $18 moves (5+2) to 9155 (050A 00 02 05 07 09) Slime, Thief, Dog, Saurian, Chimera
+ (2F)
+*If Y=3, $18 moves (5+2) to 915C (0500 00 04 06 07 09) Slime, Ogre, Wolf, Saurian, Chimera
+*If Y=4, $18 moves (5+2) to 9163 (0500 0A 02 05 08 09) Pudding, Thief, Dog, Lizardman, Chimera
+*If Y=5, $18 moves (5+2) to 916A (0500 0A 02 06 08 09) Pudding, Thief, Wolf, Lizardman, Chimera
+    Y=6,           (5+2) to 9171 (1101 0B) Stone Guardian
+    Y=7,           (1+2) to 9174 (1101 0C) Iron Guardian
+
+*Ch2 Enemy List
+(18/9177 = C1177 PC address)
+*If Y=0, $18 stays       at 9177 (050B 00 03 0E 0D 09)
+*If Y=1, $18 moves (5+2) to 917E (0502 11 02 0E 0D 09)
+*If Y=2, $18 moves (5+2) to 9185 (0502 10 02 0F 0D 09)
+*If Y=3, $18 moves (5+2) to 918C (050B 0A 02 0F 12 09)
+*If Y=4, $18 moves (5+2) to 9193 (050B 0A 13 0E 12 09)
+*If Y=5, $18 moves (5+2) to 919A (050B 0A 13 0E 12 09)*
+*If Y=6, $18 moves (5+2) to 91A1 (1101 14)
+*If Y=7, $18 moves (1+2) to 91A4 (1104 15)
+*If Y=8, $18 moves (1+2) to 91A7 (1105 16)
+
+Ch3 Enemy List
+(18/91AA = C11AA PC address)
+*If Y=0, $18 stays       at 91AA (0503 17 18 19 1A 1B)
+*If Y=1, $18 moves (5+2) to 91B1 (0503 1C 1D 1E 1A 1B)
+*If Y=2, $18 moves (5+2) to 91B8 (0503 17 1D 19 1F 20)
+*If Y=3, $18 moves (5+2) to 91BF (0503 17 18 1E 1F 20)
+    Y=4                     91C6 (0503 1C 21 22 23 24)
+    Y=5                     91CD (0506 25 25 19 23 24)
+    Y=6                     91D4 (0104 26)
+    Y=7                     91D7 (1107 28)
+    Y=8                     91DA (1101 27)
+
+
+Ch4 Enemy List
+(18/91DD = C11DD PC address)
+*If Y=0, $18 stays       at 91DD (0503 29 2A 2B 2C 24)
+*If Y=1, $18 moves (5+2) to 91E4 (0503 29 2A 2B 2C 24)*
+*If Y=2, $18 moves (5+2) to 91EB (0503 2D 2A 2E 2F 24)
+*If Y=3, $18 moves (5+2) to 91F2 (0503 30 31 2E 32 33)
+*If Y=4, $18 moves (5+2) to 91F9 (0503 2D 31 34 2F 33)
+*If Y=5, $18 moves (5+2) to 9200 (0503 30 31 34 32 33)
+*If Y=6, $18 moves (5+2) to 9207 (0506 35 35 2E 2F 24)
+*If Y=7, $18 moves (5+2) to 920E (0506 36 36 2B 32 33)
+*If Y=8, $18 moves (5+2) to 9215 (0506 37 37 2B 32 33)
+*If Y=9, $18 moves (5+2) to 921C (1101 38)
+*If Y=A, $18 moves (1+2) to 921F (0208 38 39)
+*If Y=B, $18 moves (2+2) to 9223 (0101 3A)
+*If Y=C, $18 moves (1+2) to 9226 (0101 3B)
+
+Ch5 Enemy List
+(18/9229 = C1229 PC address)
+*If Y=0, $18 stays       at 9229 (0506 36 36 40 43 41)
+*If Y=1, $18 moves (5+2) to 9230 (0506 37 37 40 43 41)
+*If Y=2, $18 moves (5+2) to 9237 (0506 3C 3C 40 43 41)
+*If Y=3, $18 moves (5+2) to 923E (0506 3D 3D 40 43 41)
+*If Y=4, $18 moves (5+2) to 9245 (0506 3E 3E 46 49 44)
+*If Y=5, $18 moves (5+2) to 924C (0506 3F 3F 46 4A 45)
+*If Y=6, $18 moves (5+2) to 9253 (0503 47 42 40 43 41)
+*If Y=7, $18 moves (5+2) to 925A (0503 48 42 46 43 45)
+*If Y=8, $18 moves (5+2) to 9261 (1101 4B)
+*If Y=9, $18 moves (1+2) to 9264 (0101 4C)
+*If Y=A, $18 moves (1+2) to 9267 (1101 4D)
+*If Y=B, $18 moves (1+2) to 926A (2109 4E)
+*If Y=C, $18 moves (1+2) to 926D (3109 4F)
+
+
+Enemy IDs
+00	Slime
+01	Pickpocket
+02	Thief
+03	Goblin
+04	Ogre
+05	Dog
+06	Wolf
+07	Saurian
+08	Lizardman
+09	Chimera
+0A	Pudding
+0B	Stone Guardian
+0C	Iron Guardian
+0D	Bee
+0E	Flytrap
+0F	Wolfsbane
+10	Jinmenju
+11	Dryad
+12	Great Lizard
+13	Assassin
+14	Cyclops
+15	Ifrit
+16	Zero
+17	Gel
+18	Hobgoblin
+19	Fighter
+1A	Thunder Ninja
+1B	Mage
+1C	Zombie
+1D	Skeleton
+1E	Witch
+1F	Basilisk
+20	Manticore
+21	Mr. Bones
+22	Lamia
+23	Deep One
+24	Warlock
+25	Troll
+26	Mimic
+27	Hydra
+28	Freddy
+29	Ghoul
+2A	Bugbear
+2B	Knight
+2C	Vampire Bee
+2D	Ghost
+2E	Lilith
+2F	Dragonian
+30	Wight
+31	Lich
+32	Priest
+33	Sorcerer
+34	Mandrake
+35	Giant
+36	Blue Dragon
+37	Green Dragon
+38	Daram
+39	Baram
+3A	Alan
+3B	Teefa
+3C	Red Dragon
+3D	Cloud Dragon
+3E	Jotun
+3F	Minotaur
+40	Sword Master
+41	Wizard
+42	Death Lich
+43	Bishop
+44	Sphinx
+45	Beelzebub
+46	Medusa
+47	Wraith
+48	Phantom
+49	Giant Bee
+4A	Queen Bee
+4B	Karl
+4C	Galneon
+4D	Galneon
+4E	Rimsala
+4F	Rimsala
+
+
+
+
+Battle List (H2 Table) format
+ Position and quantity of enemies
+*First byte, #entries
+*Each entry's first byte, #words
+*Each word, enemy position and ID position in formation table!
+ (0400 = 0 vertical, 4 horizontal, 00 first ID)
+ (2501 = 2 vertical, 5 horizontal, 01 second ID)
+
+Battle List 00
+Used by: Ch1 tiles 13-15 (Balnea 2F)
+Formations:
+ 13: 00 04 06 07 09 (Slime, Ogre, Wolf, Saurian, Chimera)
+ 14: 0A 02 05 08 09 (Pudding, Thief, Dog, Lizardman, Chimera)
+ 15: 0A 02 06 08 09 (Pudding, Thief, Wolf, Lizardman, Chimera)
+Entries @ 9288: 10
+00: 9289: 08 0400 0700 0800 2500 2600 4400 4700 4800
+01: 929A: 01 0403
+02: 929D: 01 0404
+03: 92A0: 03 0402 0703 0802
+04: 92A7: 03 0502 0602 2404
+05: 92AE: 03 0503 0603 2404
+06: 92B5: 05 0700 0800 2503 2603 4404
+07: 92C0: 05 0403 2501 2601 4700 4800
+08: 92CB: 02 0503 0603
+09: 92D0: 02 0504 0604
+0A: 92D5: 02 0503 0604
+0B: 92DA: 05 0500 0600 2401 2700 2800
+0C: 92E5: 03 0402 0702 0802
+0D: 92EC: 03 0702 2400 4803
+0E: 92F3: 05 0502 0602 2400 4704 4804
+0F: 92FE: 03 0703 0803 2404
+
+Battle List 01
+Used by: Several bosses
+Entries @ 9305: 01
+00: 9305: 01 0900
+
+Battle List 02
+Used by: Ch2 tiles 11,12 (Forest of Doubt)
+Formations:
+ 11: 11 02 0E 0D 09 (Dryad,    Thief, Flytrap,   Bee, Chimera)
+ 12: 10 02 0F 0D 09 (Jinmenju, Thief, Wolfsbane, Bee, Chimera)
+Entries @ 9309: 10
+00: 930A: 02 0500 0600
+01: 930F: 02 0502 0602
+02: 9314: 03 0500 0600 2402
+03: 931B: 05 0702 0802 2400 4503 4603
+04: 9326: 01 4403
+05: 9329: 03 0402 0702 0802
+06: 9330: 03 0500 0600 2400
+07: 9337: 01 0400
+08: 933A: 01 0402
+09: 933C: 01 0404
+0A: 9340: 05 0400 0700 0800 2502 2602
+0B: 934B: 06 0402 0702 0802 2500 2600 4403
+0C: 9358: 06 0500 0600 2700 2800 4500 4600
+0D: 9365: 03 0402 2400 4403
+0E: 936C: 03 0500 0602 2404
+0F: 9373: 04 0702 0802 2502 2602
+
+
+Battle List 03
+Used by: Ch3 (tiles 10-14) Ice Mine/ID/PL,
+         Ch4 (tiles 10-15),
+         Ch5 (tiles 16,17)
+Formations:
+ Ch3!10: 17 18 19 1A 1B (Gel, Hobgoblin, Fighter, T Ninja, Mage)
+ Ch3!11: 1C 1D 1E 1A 1B (Zombie, Skeleton, Witch, T Ninja, Mage)
+ Ch3!12: 17 1D 19 1F 20 (Gel, Skeleton, Fighter, Basilisk, Manticore)
+ Ch3!13: 17 18 1E 1F 20 (Gel, Hobgoblin, Witch, Basilisk, Manticore)
+ Ch3!14: 1C 21 22 23 24 (Zombie, Mr Bones, Lamia, Deep One, Warlock)
+ Ch4!10: 29 2A 2B 2C 24 (Ghoul, Bugbear, Knight, V Bee, Warlock)
+ Ch4!11: 29 2A 2B 2C 24*(Ghoul, Bugbear, Knight, V Bee, Warlock)
+ Ch4!12: 2D 2A 2E 2F 24 (Ghost, Bugbear, Lilith, Dragonian, Warlock)
+ Ch4!13: 30 31 2E 32 33 (Wight, Lich, Lilith, Priest, Sorcerer)
+ Ch4!14: 2D 31 34 2F 33 (Ghost, Lich, Mandrake, Dragonian, Sorcerer)
+ Ch4!15: 30 31 34 32 33 (Wight, Lich, Mandrake, Priest, Sorcerer)
+ Ch5!16: 47 42 40 43 41 (Wraith, D Lich, S Master, Bishop, Wizard)
+ Ch5!17: 48 42 46 43 45 (Phantom, D Lich, Medusa, Bishop, Beelzebub)
+
+Entries @ 937C: 10 
+00: 937D: 01 0402
+01: 9380: 01 0403 
+02: 9383: 01 0404 
+03: 9386: 01 0401 
+04: 9389: 03 0501 0601 2401
+05: 9390: 03 0502 0602 2404
+06: 9397: 07 0504 0604 2402 2704 2804 4504 4604 -> Removed back row
+07: 93A6: 05 0500 0600 2403 4702 4802
+08: 93B1: 05 0701 0801 2403 4502 4602
+09: 93BC: 05 0404 2701 2802 4503 4603
+0A: 93C7: 05 0400 0701 0802 2503 2604 
+0B: 93D2: 05 0601 0701 2501 2800 4400
+0C: 93DD: 03 0401 0702 0802
+0D: 93E4: 05 0700 0800 2501 2601 4402
+0E: 93EF: 02 0504 0602
+0F: 93F4: 05 0704 0804 2402 4704 4804
+
+Battle List 04
+Used by: Ch2 Efrite (tile 17)
+         Ch3 Mimic (tile 16)
+Entries @ 93FF: 01
+00: 9400: 01 0900
+
+
+Battle List 05
+Used by: Zero (tile 18)
+Entries @9403: 01
+00: 9403: 01 0A00
+
+Battle List 06
+Used by: Ch3 (tile 15) part of PD
+         Ch4 (tile 16-18, 26-28)
+         Ch5 (10-15)
+Formations:
+ Ch3!15: 25 25 19 23 24 (Troll, Troll, Fighter, Deep One, Warlock)
+ Ch4!x6: 35 35 2E 2F 24 (Giant, Giant, Lilith, Dragonian, Warlock)
+ Ch4!x7: 36 36 2B 32 33 (B Dragon, B Dragon, Knight, Priest, Sorcerer)
+ Ch4!x8: 37 37 2B 32 33 (G Dragon, G Dragon, Knight, Priest, Sorcerer)
+ Ch5!10: 36 36 40 43 41 (B Dragon, B Dragon, S Master, Bishop, Wizard)
+ Ch5!11: 37 37 40 43 41 (G Dragon, G Dragon, S Master, Bishop, Wizard)
+ Ch5!12: 3C 3C 40 43 41 (R Dragon, R Dragon, S Master, Bishop, Wizard)
+ Ch5!13: 3D 3D 40 43 41 (C Dragon, C Dragon, S Master, Bishop, Wizard)
+ Ch5!14: 3E 3E 46 49 44 (Jotun, Jotun, Medusa, G Bee, Sphinx)
+ Ch5!15: 3F 3F 46 4A 45 (Minotaur, Minotaur, Medusa, Q Bee, Beelzebub)
+Entries @ 9407: 10
+00: 9408: 02 0B00 0C00
+01: 940D: 01 0900
+02: 9410: 03 0502 0602 2900
+03: 9417: 03 0503 0603 2900
+04: 941E: 03 0504 0604 2900
+05: 9426: 03 0503 0604 2900
+06: 942C: 02 0B00 0C00*
+07: 9431: 02 0B00 0C00*
+08: 9436: 02 0B00 0C00*
+09: 943B: 04 0402 0702 0802 2900
+0A: 9444: 04 0403 0703 0803 2900
+0B: 944D: 04 0404 0704 0804 2900
+0C: 9456: 04 0403 0702 0804 2900
+0D: 945F: 02 0B00 0C00*
+0E: 9464: 02 0B00 0C00*
+0F: 9469: 02 0B00 0C00*
+
+Battle List 07
+Used by: Hydra
+Formations:
+ Hydra: 1107 28
+Entries @ 946E: 01
+00: 946E: 01 0C00
+
+Battle List 08
+Used by: Darah+Barah
+Formations:
+ Darah+Barah: 0208 38 39
+Entries @ 9472: 01
+00: 9472: 02 0B00 0C01
+
+Battle List 09
+Used by: Rimsala 1+2
+Formations:
+ Rimsala 1: 2109 4E
+ Rimsala 2: 3109 4F
+Entries @ 9478: 01
+00: 9478: 01 0E00
+
+Battle List 0A
+Used by: Ch1 tiles 10-12 (Balnea 1F)
+Formations:
+ Ch1!10: 00 03 05 07 09 (Slime, Goblin,    Hound, Saurian, Chimera)
+ Ch1!11: 00 01 06 07 09 (Slime, Pickpocket, Wolf, Saurian, Chimera)
+ Ch1!12: 00 02 05 07 09 (Slime, Thief,       Dog, Saurian, Chimera)
+Entries @ 947C: 10
+(18/947C = C147C PC address)
+00: 947D: 01 0400
+01: 9480: 01 0401
+02: 9483: 01 0402
+03: 9486: 02 0500 0600
+04: 948B: 02 0501 0601
+05: 9490: 02 0502 0602
+06: 9495: 03 0500 0600 2402
+07: 949C: 03 0501 0601 2402
+08: 94A3: 03 0502 0602 2403
+09: 94AA: 03 0500 0600 2400
+0A: 94B1: 03 0701 0802 2400
+0B: 94B8: 03 0402 2500 2600
+0C: 94BF: 02 0500 0601
+0D: 94C4: 02 0501 0602
+0E: 94C9: 02 0502 0600
+0F: 94CE: 05 0400 0700 0800 2501 2601
+
+Battle List 0B
+Used by: Ch2, tiles 10,13 (Dwarven Pass)
+         Ch2, tiles 14,15 (Crimson Valley)
+Formations:
+ Ch2!10: 00 03 0E 0D 09 (Slime, Goblin, Flytrap,         Bee, Chimera)
+ Ch2!13: 0A 02 0F 12 09 (Pudding, Thief, Wolfsbane, G Lizard, Chimera)
+ Ch2!14: 0A 13 0E 12 09 (Pudding, Assassin, Flytrap, G Lizard, Chimera)
+ Ch2!15: 0A 13 0E 12 09*(Pudding, Assassin, Flytrap, G Lizard, Chimera)
+Entries @ 94D9: 10  -- C1270 offsets
+00: 94DA: 01 0401
+01: 94DD: 02 0500 0600
+02: 94E2: 03 0501 0601 2403
+03: 94E9: 03 0404 0703 0803
+04: 94F0: 01 0403
+05: 94F3: 03 0501 0601 2404
+06: 94FA: 03 0400 0700 0800
+07: 9501: 05 0404 0704 0804 2503 2603
+08: 950C: 03 0404 0701 0801
+09: 9513: 05 0701 0801 2503 2603 4403
+0A: 951E: 06 0404 2501 2601 4403 4703 4803
+0B: 952B: 03 0403 2503 2603
+0C: 9532: 02 0504 0604
+0D: 9537: 02 0503 0603
+0E: 953C: 05 0500 0600 2400 4500 4600
+0F: 9547: 03 0504 0604 2403
+
+
+
+Testing position data with Mimic, SORv1.0dx:
+Ice Mine entryway @ A097A9-B5 set to 26 (high enc Mimic)
+Mimic H2 table @ 989400 set to 1800
+Turns out ROM map is loaded into RAM already
+To reload the map from ROM, re-enter the dungeon
+Positions: 
+47   45  0E/44  46  48  Back row (0E is slightly forward from 44, used for Rimsala)
+27  25 0D 24/29 26  28  Middle row (0D is between 25 and 24)
+     0B    09   0A/0C   Half-middle row (0A is slightly off)
+07   05    04   06  08  Front row
+
+00 01 02 03: Character positions
+
+Other odd ones: 66, 86
+
+Any other position will get defaulted to the top left corner.
