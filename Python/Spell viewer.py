@@ -1,4 +1,4 @@
-file="Arcana SOR v2.1 a9.smc"
+file="Arcana SOR v2.1 a13.smc"
 #file ="Arcana (u).smc"
 f = open(file,'rb')
 
@@ -30,7 +30,10 @@ f.seek(191309)
 #Get power (POWAHR!)
 for x in range(81):
     testme = f.read(2)
-    powerList.append( int.from_bytes(testme, byteorder='little'))
+    #Display hex for the hardcoded spells
+    if((x >= 39 and x <= 74) and int.from_bytes(testme, byteorder='little') != 0): powerList.append(hex(int.from_bytes(testme, byteorder='little')))
+    else: powerList.append( int.from_bytes(testme, byteorder='little'))
+
 
 f.seek(191491)
 #Get element
